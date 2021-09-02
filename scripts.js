@@ -7,7 +7,6 @@ const showErrorText = (err = 'Sorry! No results found.') => {
         <img class="img-fluid" src="images/no-result-found.svg" alt="">
     </div>
     `
-
 }
 
 // toggle spinner function declaration 
@@ -20,7 +19,8 @@ const loadBooks = () => {
     const searchText = searchField.value.trim();
 
     // spinnerToggle function call 
-    spinnerToggle('block', 'none');
+    spinnerToggle('block');
+    document.getElementById('search-result-field').textContent = '';
     document.getElementById('books-container').classList.add('d-none');
 
     // clear search field 
@@ -31,7 +31,7 @@ const loadBooks = () => {
 
     }
     else {
-        fetch(`http://openlibrary.org/search.json?q=${searchText}`)
+        fetch(`https://openlibrary.org/search.json?q=${searchText}`)
             .then(response => response.json())
             .then(data => displayBooks(data));
     }
@@ -44,16 +44,15 @@ const displayBooks = data => {
     const books = data.docs;
     const booksContainer = document.getElementById('books-container');
 
-
     // clear previous search results 
     booksContainer.textContent = '';
 
     // show the number of total book result 
-    const searchResultMessage = document.getElementById('search-result-field');
-    searchResultMessage.textContent = '';
+    const searchResultField = document.getElementById('search-result-field');
+    searchResultField.textContent = '';
     const p = document.createElement('p');
     p.innerText = `About ${data.numFound} books found`;
-    searchResultMessage.appendChild(p);
+    searchResultField.appendChild(p);
     if (books.length === 0) {
         showErrorText();
         spinnerToggle('none');
@@ -61,9 +60,9 @@ const displayBooks = data => {
 
     else {
         // book display card 
-        console.log(books)
-        books?.forEach(book => {
 
+        books?.forEach(book => {
+            // console.log(book.key)
             const div = document.createElement('div');
             div.classList.add('col');
             div.innerHTML = `
@@ -75,12 +74,12 @@ const displayBooks = data => {
                     <div class="col-md-8">
                         <div class="card-body container">
                             <h5 class="card-title">${book.title}</h5>
-                            <p class="card-text">by ${book.author_name ? book.author_name.toString() : ''}</p>
+                            <p class="card-text">Author: ${book.author_name ? book.author_name.toString() : 'Unknown'}</p>
                             <p class="card-text"><small class="text-muted"> publisher: 
                                     ${book.publisher ? book.publisher[0] : ''}</small></p>                      
                             <p class="card-text"><small class="text-muted">First published in  <span class="text-primary">${book.first_publish_year}</span></small></p>
 
-                            <p class="card-text"><small class="text-muted"><span class="text-primary">${book.edition_count}</span> editions in  <span class="text-primary">${book.language ? book.language.length : ''}</span> languages</small></p>
+                            <p class="card-text"><small class="text-muted"><span class="text-primary">${book.edition_count ? book.edition_count : '0'}</span> editions in  <span class="text-primary">${book.language ? book.language.length : ''}</span> languages</small></p>
                             <button type="button" class="btn btn-primary btn-lg">Read Book</button>
                             
                         </div>
@@ -93,11 +92,5 @@ const displayBooks = data => {
         // toggleSpinner function call 
         spinnerToggle('none');
         document.getElementById('books-container').classList.remove('d-none');
-
     }
-
-
-
-
-
 }
